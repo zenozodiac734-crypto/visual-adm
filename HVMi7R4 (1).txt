@@ -1,0 +1,3087 @@
+local Players = game:GetService("Players")
+
+local localPlayer = Players.LocalPlayer
+
+-- Load WindUI
+
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+-- Show popup
+
+local Confirmed = false
+
+WindUI:Popup({
+
+    Title = "Benjo Hub",
+
+    Icon = "cuboid",
+
+    IconThemed = true,
+
+    Content = "Make sure you join our server for more updates",
+
+    Buttons = {
+
+        {
+
+            Title = "Cancel",
+
+            Callback = function() end,
+
+            Variant = "Secondary"
+
+        },
+
+        {
+
+            Title = "Continue",
+
+            Icon = "arrow-right",
+
+            Callback = function()
+
+                Confirmed = true
+
+            end,
+
+            Variant = "Primary"
+
+        }
+
+    }
+
+})
+
+repeat wait() until Confirmed
+
+-- Create Main Window
+
+local Window = WindUI:CreateWindow({
+
+    Title = "Adopt Me | Benjo Hub",
+
+    Icon = "laptop",
+
+    Author = "made by benjo",
+
+    Folder = "BenjoHubAdoptMe",
+
+    Size = UDim2.fromOffset(520, 420),
+
+    Transparent = false,
+
+    Theme = "Dark",
+
+    User = {
+
+        Enabled = true,
+
+        Callback = function() end,
+
+        Anonymous = false
+
+    },
+
+    SideBarWidth = 150,
+
+    ScrollBarEnabled = true
+
+})
+
+Window:EditOpenButton({
+
+    Title = "Open Benjo Hub",
+
+    Icon = "rbxassetid://4483345998",
+
+    CornerRadius = UDim.new(0, 16),
+
+    StrokeThickness = 2,
+
+    Color = ColorSequence.new(Color3.fromHex("5787d2"), Color3.fromHex("ffffff")),
+
+    OnlyMobile = false,
+
+    Enabled = true,
+
+    Draggable = true
+
+})
+
+Window:SetToggleKey(Enum.KeyCode.K)
+
+-------------------------------------------------------
+
+--                CREATE TABS
+
+-------------------------------------------------------
+
+local GingerbreadTab = Window:Tab({
+
+    Title = "Gingerbread Farm",
+
+    Icon = "cookie",
+
+    Desc = "Auto farm gingerbread"
+
+})
+
+local PetSpawnerTab = Window:Tab({
+
+    Title = "Pet Spawner",
+
+    Icon = "heart",
+
+    Desc = "Spawn pets"
+
+})
+
+local TeleportsTab = Window:Tab({
+
+    Title = "Teleports",
+
+    Icon = "map-pin",
+
+    Desc = "Teleport to locations"
+
+})
+
+local MinigamesTab = Window:Tab({
+
+    Title = "Minigames",
+
+    Icon = "gamepad-2",
+
+    Desc = "Auto play minigames"
+
+})
+
+local MiscTab = Window:Tab({
+
+    Title = "Misc",
+
+    Icon = "settings",
+
+    Desc = "Miscellaneous features"
+
+})
+
+local HouseClonerTab = Window:Tab({
+
+    Title = "House Cloner",
+
+    Icon = "skull",
+
+    Desc = "Clone and load houses"
+
+})
+
+local DiscordTab = Window:Tab({
+
+    Title = "Discord",
+
+    Icon = "users",
+
+    Desc = "Join our community"
+
+})
+
+-------------------------------------------------------
+
+--          GINGERBREAD FARM SETTINGS
+
+-------------------------------------------------------
+
+local GingerbreadSettings = {
+
+    Farming = false,
+
+    Delay = 0.5,
+
+    StartIndex = 32,
+
+    EndIndex = 188,
+
+    AntiAFK = true,
+
+    Notifications = true,
+
+    CurrentIndex = 32,
+
+    CollectEnabled = true
+
+}
+
+local GingerbreadStats = {
+
+    Collected = 0,
+
+    Loops = 0,
+
+    StartTime = 0
+
+}
+
+-- Character references
+
+local Character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+localPlayer.CharacterAdded:Connect(function(newChar)
+
+    Character = newChar
+
+    HumanoidRootPart = newChar:WaitForChild("HumanoidRootPart")
+
+end)
+
+-- Gingerbread Functions
+
+local function getGingerbreadPosition(index)
+
+    local interior = workspace:FindFirstChild("Interiors")
+
+    if not interior then return nil end
+
+    
+
+    local christmas = interior:FindFirstChild("MainMap!Christmas")
+
+    if not christmas then return nil end
+
+    
+
+    local children = christmas:GetChildren()
+
+    if index < 1 or index > #children then return nil end
+
+    
+
+    local model = children[index]
+
+    if not model then return nil end
+
+    
+
+    local gingerbread = model:FindFirstChild("GingerbreadMan") or 
+
+                       model:FindFirstChild("Gingerbread") or
+
+                       model:FindFirstChildWhichIsA("Model")
+
+    
+
+    if gingerbread then
+
+        local basePart = gingerbread:FindFirstChildWhichIsA("BasePart")
+
+        if basePart then
+
+            return basePart.CFrame
+
+        elseif gingerbread:IsA("BasePart") then
+
+            return gingerbread.CFrame
+
+        end
+
+    end
+
+    
+
+    local primaryPart = model.PrimaryPart
+
+    if primaryPart then
+
+        return primaryPart.CFrame
+
+    end
+
+    
+
+    return model:GetPivot()
+
+end
+
+local function tryCollect()
+
+    if not GingerbreadSettings.CollectEnabled then return false end
+
+    
+
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+
+    local remotePaths = {"adoptme_new_net", "adoptme_net", "MainRemote", "IceSkatingNet"}
+
+    local eventNames = {
+
+        "adoptme_legacy_shared.ContentPacks.Winter2025.Game.IceSkating.IceSkatingNet:16",
+
+        "IceSkating:CollectGingerbread",
+
+        "CollectGingerbread",
+
+        "CollectGingerbreadMan",
+
+        "WinterEvent:Collect"
+
+    }
+
+    
+
+    for _, path in pairs(remotePaths) do
+
+        local remote = replicatedStorage:FindFirstChild(path)
+
+        if remote then
+
+            for _, eventName in pairs(eventNames) do
+
+                local event = remote:FindFirstChild(eventName)
+
+                if event then
+
+                    local success = pcall(function()
+
+                        event:FireServer()
+
+                    end)
+
+                    if success then return true end
+
+                end
+
+            end
+
+        end
+
+    end
+
+    return false
+
+end
+
+local function startGingerbreadFarming()
+
+    GingerbreadStats.StartTime = tick()
+
+    
+
+    while GingerbreadSettings.Farming and HumanoidRootPart do
+
+        for i = GingerbreadSettings.StartIndex, GingerbreadSettings.EndIndex do
+
+            if not GingerbreadSettings.Farming then break end
+
+            if not HumanoidRootPart then break end
+
+            
+
+            GingerbreadSettings.CurrentIndex = i
+
+            
+
+            local cframe = getGingerbreadPosition(i)
+
+            if cframe then
+
+                HumanoidRootPart.CFrame = cframe + Vector3.new(0, 3, 0)
+
+                task.wait(0.3)
+
+                
+
+                if GingerbreadSettings.CollectEnabled then
+
+                    local collected = tryCollect()
+
+                    if collected then
+
+                        GingerbreadStats.Collected = GingerbreadStats.Collected + 1
+
+                    end
+
+                end
+
+            end
+
+            
+
+            if GingerbreadSettings.Farming then
+
+                for waitTime = 0, GingerbreadSettings.Delay, 0.1 do
+
+                    if not GingerbreadSettings.Farming then break end
+
+                    task.wait(0.1)
+
+                end
+
+            end
+
+        end
+
+        
+
+        if GingerbreadSettings.Farming then
+
+            GingerbreadStats.Loops = GingerbreadStats.Loops + 1
+
+            task.wait(1)
+
+        end
+
+    end
+
+end
+
+-- Anti-AFK
+
+local function setupAntiAFK()
+
+    if GingerbreadSettings.AntiAFK then
+
+        local VirtualUser = game:GetService("VirtualUser")
+
+        localPlayer.Idled:Connect(function()
+
+            VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+
+            task.wait(1)
+
+            VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+
+        end)
+
+    end
+
+end
+
+setupAntiAFK()
+
+-------------------------------------------------------
+
+--          GINGERBREAD TAB UI
+
+-------------------------------------------------------
+
+GingerbreadTab:Paragraph({
+
+    Title = "Gingerbread Auto Farm",
+
+    Desc = "Automatically teleport to and collect gingerbread items",
+
+    Image = "cookie",
+
+    Color = "Blue"
+
+})
+
+GingerbreadTab:Toggle({
+
+    Title = "Start Farming",
+
+    Default = false,
+
+    Callback = function(value)
+
+        GingerbreadSettings.Farming = value
+
+        if value then
+
+            GingerbreadStats.Collected = 0
+
+            GingerbreadStats.Loops = 0
+
+            WindUI:Notify({
+
+                Title = "Farming Started",
+
+                Content = "Gingerbread farming is now active!",
+
+                Icon = "check",
+
+                Duration = 3
+
+            })
+
+            task.spawn(startGingerbreadFarming)
+
+        else
+
+            WindUI:Notify({
+
+                Title = "Farming Stopped",
+
+                Content = "Stopped at index " .. GingerbreadSettings.CurrentIndex,
+
+                Icon = "x",
+
+                Duration = 3
+
+            })
+
+        end
+
+    end
+
+})
+
+GingerbreadTab:Toggle({
+
+    Title = "Auto Collect",
+
+    Default = true,
+
+    Callback = function(value)
+
+        GingerbreadSettings.CollectEnabled = value
+
+    end
+
+})
+
+GingerbreadTab:Slider({
+
+    Title = "Teleport Delay",
+
+    Min = 0.1,
+
+    Max = 3,
+
+    Default = 0.5,
+
+    Callback = function(value)
+
+        GingerbreadSettings.Delay = value
+
+    end
+
+})
+
+GingerbreadTab:Input({
+
+    Title = "Start Index",
+
+    Value = "32",
+
+    InputIcon = "hash",
+
+    Placeholder = "Enter start index (1-200)",
+
+    Callback = function(input)
+
+        local num = tonumber(input)
+
+        if num and num >= 1 and num <= 200 then
+
+            GingerbreadSettings.StartIndex = num
+
+            GingerbreadSettings.CurrentIndex = num
+
+        end
+
+    end
+
+})
+
+GingerbreadTab:Input({
+
+    Title = "End Index",
+
+    Value = "188",
+
+    InputIcon = "hash",
+
+    Placeholder = "Enter end index (1-200)",
+
+    Callback = function(input)
+
+        local num = tonumber(input)
+
+        if num and num >= 1 and num <= 200 then
+
+            GingerbreadSettings.EndIndex = num
+
+        end
+
+    end
+
+})
+
+GingerbreadTab:Button({
+
+    Title = "Test Current Position",
+
+    Icon = "map-pin",
+
+    Callback = function()
+
+        pcall(function()
+
+            local cframe = getGingerbreadPosition(GingerbreadSettings.CurrentIndex)
+
+            if cframe and HumanoidRootPart then
+
+                HumanoidRootPart.CFrame = cframe + Vector3.new(0, 3, 0)
+
+                WindUI:Notify({
+
+                    Title = "Test Teleport",
+
+                    Content = "Teleported to index " .. GingerbreadSettings.CurrentIndex,
+
+                    Icon = "navigation",
+
+                    Duration = 2
+
+                })
+
+            end
+
+        end)
+
+    end
+
+})
+
+GingerbreadTab:Button({
+
+    Title = "Reset Statistics",
+
+    Icon = "refresh-ccw",
+
+    Callback = function()
+
+        GingerbreadStats.Collected = 0
+
+        GingerbreadStats.Loops = 0
+
+        GingerbreadStats.StartTime = tick()
+
+        WindUI:Notify({
+
+            Title = "Stats Reset",
+
+            Content = "All statistics cleared",
+
+            Icon = "check",
+
+            Duration = 2
+
+        })
+
+    end
+
+})
+
+-- Live Stats Display
+
+task.spawn(function()
+
+    while true do
+
+        pcall(function()
+
+            local status = GingerbreadSettings.Farming and "Running" or "Stopped"
+
+            local runtime = string.format("%.1f", (tick() - GingerbreadStats.StartTime) / 60)
+
+            print(string.format(
+
+                "[Gingerbread Farm] Status: %s | Index: %d | Collected: %d | Loops: %d | Runtime: %s min",
+
+                status, GingerbreadSettings.CurrentIndex, GingerbreadStats.Collected, 
+
+                GingerbreadStats.Loops, runtime
+
+            ))
+
+        end)
+
+        task.wait(5)
+
+    end
+
+end)
+
+-------------------------------------------------------
+
+--          PET SPAWNER SETUP
+
+-------------------------------------------------------
+
+task.spawn(function()
+
+    local load = require(game.ReplicatedStorage:WaitForChild("Fsys")).load
+
+    
+
+    set_thread_identity(2)
+
+    local clientData = load("ClientData")
+
+    local items = load("KindDB")
+
+    local router = load("RouterClient")
+
+    local downloader = load("DownloadClient")
+
+    local animationManager = load("AnimationManager")
+
+    local petRigs = load("new:PetRigs")
+
+    set_thread_identity(8)
+
+    
+
+    local petModels = {}
+
+    local pets = {}
+
+    local equippedPet = nil
+
+    local mountedPet = nil
+
+    local currentMountTrack = nil
+
+    
+
+    local function updateData(key, action)
+
+        local data = clientData.get(key)
+
+        local clonedData = table.clone(data)
+
+        clientData.predict(key, action(clonedData))
+
+    end
+
+    
+
+    local function getUniqueId()
+
+        local HttpService = game:GetService("HttpService")
+
+        return HttpService:GenerateGUID(false)
+
+    end
+
+    
+
+    local function getPetModel(kind)
+
+        if petModels[kind] then
+
+            return petModels[kind]
+
+        end
+
+        local streamed = downloader.promise_download_copy("Pets", kind):expect()
+
+        petModels[kind] = streamed
+
+        return streamed
+
+    end
+
+    
+
+    local function createPet(id, properties)
+
+        local uniqueId = getUniqueId()
+
+        local pet = nil
+
+        
+
+        set_thread_identity(2)
+
+        updateData("inventory", function(inventory)
+
+            local newPets = table.clone(inventory.pets)
+
+            local item = items[id]
+
+            pet = {
+
+                unique = uniqueId,
+
+                category = "pets",
+
+                id = id,
+
+                kind = item.kind,
+
+                newness_order = 0,
+
+                properties = properties
+
+            }
+
+            newPets[uniqueId] = pet
+
+            inventory.pets = newPets
+
+            return inventory
+
+        end)
+
+        
+
+        set_thread_identity(8)
+
+        pets[uniqueId] = {data = pet, model = nil}
+
+        return pet
+
+    end
+
+    
+
+    local function neonify(model, entry)
+
+        local petModel = model:FindFirstChild("PetModel")
+
+        if not petModel then return end
+
+        for neonPart, configuration in pairs(entry.neon_parts) do
+
+            local trueNeonPart = petRigs.get(petModel).get_geo_part(petModel, neonPart)
+
+            trueNeonPart.Material = configuration.Material
+
+            trueNeonPart.Color = configuration.Color
+
+        end
+
+    end
+
+    
+
+    local function addPetWrapper(wrapper)
+
+        updateData("pet_char_wrappers", function(petWrappers)
+
+            wrapper.unique = #petWrappers + 1
+
+            wrapper.index = #petWrappers + 1
+
+            petWrappers[#petWrappers + 1] = wrapper
+
+            return petWrappers
+
+        end)
+
+    end
+
+    
+
+    local function addPetState(state)
+
+        updateData("pet_state_managers", function(petStates)
+
+            petStates[#petStates + 1] = state
+
+            return petStates
+
+        end)
+
+    end
+
+    
+
+    local function findIndex(array, finder)
+
+        for index, value in pairs(array) do
+
+            if finder(value, index) then
+
+                return index
+
+            end
+
+        end
+
+        return nil
+
+    end
+
+    
+
+    local function removePetWrapper(uniqueId)
+
+        updateData("pet_char_wrappers", function(petWrappers)
+
+            local index = findIndex(petWrappers, function(wrapper)
+
+                return wrapper.pet_unique == uniqueId
+
+            end)
+
+            if not index then return petWrappers end
+
+            table.remove(petWrappers, index)
+
+            for wrapperIndex, wrapper in pairs(petWrappers) do
+
+                wrapper.unique = wrapperIndex
+
+                wrapper.index = wrapperIndex
+
+            end
+
+            return petWrappers
+
+        end)
+
+    end
+
+    
+
+    local function clearPetState(uniqueId)
+
+        local pet = pets[uniqueId]
+
+        if not pet or not pet.model then return end
+
+        updateData("pet_state_managers", function(states)
+
+            local index = findIndex(states, function(state)
+
+                return state.char == pet.model
+
+            end)
+
+            if not index then return states end
+
+            local clonedStates = table.clone(states)
+
+            clonedStates[index] = table.clone(clonedStates[index])
+
+            clonedStates[index].states = {}
+
+            return clonedStates
+
+        end)
+
+    end
+
+    
+
+    local function setPetState(uniqueId, id)
+
+        local pet = pets[uniqueId]
+
+        if not pet or not pet.model then return end
+
+        updateData("pet_state_managers", function(states)
+
+            local index = findIndex(states, function(state)
+
+                return state.char == pet.model
+
+            end)
+
+            if not index then return states end
+
+            local clonedStates = table.clone(states)
+
+            clonedStates[index] = table.clone(clonedStates[index])
+
+            clonedStates[index].states = {{id = id}}
+
+            return clonedStates
+
+        end)
+
+    end
+
+    
+
+    local function attachPlayerToPet(pet)
+
+        local character = game.Players.LocalPlayer.Character
+
+        if not character or not character.PrimaryPart then return false end
+
+        local ridePosition = pet:FindFirstChild("RidePosition", true)
+
+        if not ridePosition then return false end
+
+        
+
+        local sourceAttachment = Instance.new("Attachment")
+
+        sourceAttachment.Parent = ridePosition
+
+        sourceAttachment.Position = Vector3.new(0, 1.237, 0)
+
+        sourceAttachment.Name = "SourceAttachment"
+
+        
+
+        local stateConnection = Instance.new("RigidConstraint")
+
+        stateConnection.Name = "StateConnection"
+
+        stateConnection.Attachment0 = sourceAttachment
+
+        stateConnection.Attachment1 = character.PrimaryPart.RootAttachment
+
+        stateConnection.Parent = character
+
+        return true
+
+    end
+
+    
+
+    local function clearPlayerState()
+
+        updateData("state_manager", function(state)
+
+            local clonedState = table.clone(state)
+
+            clonedState.states = {}
+
+            clonedState.is_sitting = false
+
+            return clonedState
+
+        end)
+
+    end
+
+    
+
+    local function setPlayerState(id)
+
+        updateData("state_manager", function(state)
+
+            local clonedState = table.clone(state)
+
+            clonedState.states = {{id = id}}
+
+            clonedState.is_sitting = true
+
+            return clonedState
+
+        end)
+
+    end
+
+    
+
+    local function removePetState(uniqueId)
+
+        local pet = pets[uniqueId]
+
+        if not pet or not pet.model then return end
+
+        updateData("pet_state_managers", function(petStates)
+
+            local index = findIndex(petStates, function(state)
+
+                return state.char == pet.model
+
+            end)
+
+            if not index then return petStates end
+
+            table.remove(petStates, index)
+
+            return petStates
+
+        end)
+
+    end
+
+    
+
+    local function unmount(uniqueId)
+
+        local pet = pets[uniqueId]
+
+        if not pet or not pet.model then return end
+
+        if currentMountTrack then
+
+            currentMountTrack:Stop()
+
+            currentMountTrack:Destroy()
+
+        end
+
+        local sourceAttachment = pet.model:FindFirstChild("SourceAttachment", true)
+
+        if sourceAttachment then
+
+            sourceAttachment:Destroy()
+
+        end
+
+        if game.Players.LocalPlayer.Character then
+
+            for _, d in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+
+                if d:IsA("BasePart") and d:GetAttribute("HaveMass") then
+
+                    d.Massless = false
+
+                end
+
+            end
+
+        end
+
+        clearPetState(uniqueId)
+
+        clearPlayerState()
+
+        pet.model:ScaleTo(1)
+
+        mountedPet = nil
+
+    end
+
+    
+
+    local function mount(uniqueId, playerState, petState)
+
+        local pet = pets[uniqueId]
+
+        if not pet or not pet.model then return end
+
+        local player = game.Players.LocalPlayer
+
+        if not player.Character or not player.Character.PrimaryPart then return end
+
+        mountedPet = uniqueId
+
+        setPetState(uniqueId, petState)
+
+        setPlayerState(playerState)
+
+        pet.model:ScaleTo(2)
+
+        attachPlayerToPet(pet.model)
+
+        currentMountTrack = player.Character.Humanoid.Animator:LoadAnimation(animationManager.get_track("PlayerRidingPet"))
+
+        player.Character.Humanoid.Sit = true
+
+        for _, d in pairs(player.Character:GetDescendants()) do
+
+            if d:IsA("BasePart") and d.Massless == false then
+
+                d.Massless = true
+
+                d:SetAttribute("HaveMass", true)
+
+            end
+
+        end
+
+        currentMountTrack:Play()
+
+    end
+
+    
+
+    local function fly(uniqueId)
+
+        mount(uniqueId, "PlayerFlyingPet", "PetBeingFlown")
+
+    end
+
+    
+
+    local function ride(uniqueId)
+
+        mount(uniqueId, "PlayerRidingPet", "PetBeingRidden")
+
+    end
+
+    
+
+    local function unequip(item)
+
+        local pet = pets[item.unique]
+
+        if not pet or not pet.model then return end
+
+        unmount(item.unique)
+
+        removePetWrapper(item.unique)
+
+        removePetState(item.unique)
+
+        pet.model:Destroy()
+
+        pet.model = nil
+
+        equippedPet = nil
+
+    end
+
+    
+
+    local function equip(item)
+
+        if equippedPet then
+
+            unequip(equippedPet)
+
+        end
+
+        local petModel = getPetModel(item.kind):Clone()
+
+        petModel.Parent = workspace
+
+        pets[item.unique].model = petModel
+
+        if item.properties.neon or item.properties.mega_neon then
+
+            neonify(petModel, items[item.kind])
+
+        end
+
+        equippedPet = item
+
+        addPetWrapper({
+
+            char = petModel,
+
+            mega_neon = item.properties.mega_neon,
+
+            neon = item.properties.neon,
+
+            player = game.Players.LocalPlayer,
+
+            entity_controller = game.Players.LocalPlayer,
+
+            controller = game.Players.LocalPlayer,
+
+            rp_name = item.properties.rp_name or "",
+
+            pet_trick_level = item.properties.pet_trick_level,
+
+            pet_unique = item.unique,
+
+            pet_id = item.id,
+
+            location = {
+
+                full_destination_id = "housing",
+
+                destination_id = "housing",
+
+                house_owner = game.Players.LocalPlayer
+
+            },
+
+            pet_progression = {
+
+                friendship_level = item.properties.friendship_level,
+
+                age = item.properties.age,
+
+                percentage = 0
+
+            },
+
+            are_colors_sealed = false,
+
+            is_pet = true
+
+        })
+
+        addPetState({
+
+            char = petModel,
+
+            player = game.Players.LocalPlayer,
+
+            store_key = "pet_state_managers",
+
+            is_sitting = false,
+
+            chars_connected_to_me = {},
+
+            states = {}
+
+        })
+
+    end
+
+    
+
+    local oldGet = router.get
+
+    local function createRemoteFunctionMock(callback)
+
+        return {
+
+            InvokeServer = function(_, ...)
+
+                return callback(...)
+
+            end
+
+        }
+
+    end
+
+    
+
+    local function createRemoteEventMock(callback)
+
+        return {
+
+            FireServer = function(_, ...)
+
+                return callback(...)
+
+            end
+
+        }
+
+    end
+
+    
+
+    local equipRemote = createRemoteFunctionMock(function(uniqueId, metadata)
+
+        local pet = pets[uniqueId]
+
+        if not pet then return end
+
+        equip(pet.data)
+
+        return true, {action = "equip", is_server = true}
+
+    end)
+
+    
+
+    local unequipRemote = createRemoteFunctionMock(function(uniqueId)
+
+        local pet = pets[uniqueId]
+
+        if not pet then return end
+
+        unequip(pet.data)
+
+        return true, {action = "unequip", is_server = true}
+
+    end)
+
+    
+
+    local rideRemote = createRemoteFunctionMock(function(item)
+
+        ride(item.pet_unique)
+
+    end)
+
+    
+
+    local flyRemote = createRemoteFunctionMock(function(item)
+
+        fly(item.pet_unique)
+
+    end)
+
+    
+
+    local unmountRemoteFunction = createRemoteFunctionMock(function()
+
+        unmount(mountedPet)
+
+    end)
+
+    
+
+    local unmountRemoteEvent = createRemoteEventMock(function()
+
+        unmount(mountedPet)
+
+    end)
+
+    
+
+    router.get = function(name)
+
+        if name == "ToolAPI/Equip" then
+
+            return equipRemote
+
+        end
+
+        if name == "ToolAPI/Unequip" then
+
+            return unequipRemote
+
+        end
+
+        if name == "AdoptAPI/RidePet" then
+
+            return rideRemote
+
+        end
+
+        if name == "AdoptAPI/FlyPet" then
+
+            return flyRemote
+
+        end
+
+        if name == "AdoptAPI/ExitSeatStatesYield" then
+
+            return unmountRemoteFunction
+
+        end
+
+        if name == "AdoptAPI/ExitSeatStates" then
+
+            return unmountRemoteEvent
+
+        end
+
+        return oldGet(name)
+
+    end
+
+    
+
+    for _, charWrapper in pairs(clientData.get("pet_char_wrappers")) do
+
+        oldGet("ToolAPI/Unequip"):InvokeServer(charWrapper.pet_unique)
+
+    end
+
+    
+
+    local Loads = require(game.ReplicatedStorage.Fsys).load
+
+    local InventoryDB = Loads("InventoryDB")
+
+    
+
+    function GetPetByName(name)
+
+        for i, v in pairs(InventoryDB.pets) do
+
+            if v.name:lower() == name:lower() then
+
+                return v.id
+
+            end
+
+        end
+
+        return false
+
+    end
+
+    
+
+    -- Pet Spawner UI Variables
+
+    _G.PetSpawnerData = {
+
+        petName = nil,
+
+        petType = "FR",
+
+        createPet = createPet,
+
+        GetPetByName = GetPetByName
+
+    }
+
+end)
+
+-------------------------------------------------------
+
+--          PET SPAWNER TAB UI
+
+-------------------------------------------------------
+
+PetSpawnerTab:Paragraph({
+
+    Title = "Pet Spawner",
+
+    Desc = "Enter pet name and choose type before spawning",
+
+    Image = "heart",
+
+    Color = "Blue"
+
+})
+
+PetSpawnerTab:Input({
+
+    Title = "Pet Name",
+
+    Value = "",
+
+    InputIcon = "search",
+
+    Placeholder = "Enter pet name",
+
+    Callback = function(input)
+
+        if _G.PetSpawnerData then
+
+            _G.PetSpawnerData.petName = input
+
+            print("Pet name set to:", input)
+
+        end
+
+    end
+
+})
+
+PetSpawnerTab:Dropdown({
+
+    Title = "Pet Type",
+
+    Values = {"FR", "NFR", "MFR"},
+
+    Multi = false,
+
+    Default = "FR",
+
+    Callback = function(value)
+
+        if _G.PetSpawnerData then
+
+            _G.PetSpawnerData.petType = value
+
+            print("Pet type set to:", value)
+
+        end
+
+    end
+
+})
+
+PetSpawnerTab:Button({
+
+    Title = "Spawn Pet",
+
+    Icon = "sparkles",
+
+    Callback = function()
+
+        task.spawn(function()
+
+            if not _G.PetSpawnerData then
+
+                WindUI:Notify({
+
+                    Title = "Error",
+
+                    Content = "Pet spawner not loaded yet. Please wait.",
+
+                    Icon = "alert-circle",
+
+                    Duration = 3
+
+                })
+
+                return
+
+            end
+
+            
+
+            local petName = _G.PetSpawnerData.petName
+
+            local petType = _G.PetSpawnerData.petType
+
+            
+
+            if not petName or petName == "" then
+
+                WindUI:Notify({
+
+                    Title = "Error",
+
+                    Content = "Please enter a pet name!",
+
+                    Icon = "alert-circle",
+
+                    Duration = 3
+
+                })
+
+                return
+
+            end
+
+            
+
+            local petId = _G.PetSpawnerData.GetPetByName(petName)
+
+            if not petId then
+
+                WindUI:Notify({
+
+                    Title = "Error",
+
+                    Content = "Pet not found! Please try again.",
+
+                    Icon = "shield-alert",
+
+                    Duration = 3
+
+                })
+
+                return
+
+            end
+
+            
+
+            WindUI:Notify({
+
+                Title = "Spawning Pet",
+
+                Content = "Creating " .. petName .. " (" .. petType .. ")",
+
+                Icon = "loader",
+
+                Duration = 2
+
+            })
+
+            
+
+            if petType == "FR" then
+
+                _G.PetSpawnerData.createPet(petId, {
+
+                    pet_trick_level = 0,
+
+                    rideable = true,
+
+                    flyable = true,
+
+                    friendship_level = 0,
+
+                    age = 1,
+
+                    ailments_completed = 0,
+
+                    rp_name = ""
+
+                })
+
+            elseif petType == "NFR" then
+
+                _G.PetSpawnerData.createPet(petId, {
+
+                    pet_trick_level = 0,
+
+                    neon = true,
+
+                    rideable = true,
+
+                    flyable = true,
+
+                    friendship_level = 0,
+
+                    age = 1,
+
+                    ailments_completed = 0,
+
+                    rp_name = ""
+
+                })
+
+            elseif petType == "MFR" then
+
+                _G.PetSpawnerData.createPet(petId, {
+
+                    pet_trick_level = 0,
+
+                    mega_neon = true,
+
+                    rideable = true,
+
+                    flyable = true,
+
+                    friendship_level = 0,
+
+                    age = 1,
+
+                    ailments_completed = 0,
+
+                    rp_name = ""
+
+                })
+
+            end
+
+            
+
+            WindUI:Notify({
+
+                Title = "Success",
+
+                Content = "Pet spawned successfully!",
+
+                Icon = "check",
+
+                Duration = 3
+
+            })
+
+        end)
+
+    end
+
+})
+
+-------------------------------------------------------
+
+--          TELEPORTS TAB
+
+-------------------------------------------------------
+
+TeleportsTab:Paragraph({
+
+    Title = "Christmas Event Teleports",
+
+    Desc = "Quick teleport to event locations",
+
+    Image = "map-pin",
+
+    Color = "Blue"
+
+})
+
+TeleportsTab:Button({
+
+    Title = "Christmas Spirit",
+
+    Icon = "sparkles",
+
+    Callback = function()
+
+        pcall(function()
+
+            local spirit = workspace.Interiors["MainMap!Christmas"].Event.PetEntities:GetChildren()[2]
+
+            if spirit and HumanoidRootPart then
+
+                HumanoidRootPart.CFrame = spirit.PetModel.MockParts.Head:GetPivot()
+
+                WindUI:Notify({
+
+                    Title = "Teleported",
+
+                    Content = "Teleported to Christmas Spirit!",
+
+                    Icon = "check",
+
+                    Duration = 2
+
+                })
+
+            else
+
+                WindUI:Notify({
+
+                    Title = "Error",
+
+                    Content = "Christmas Spirit not found!",
+
+                    Icon = "alert-circle",
+
+                    Duration = 3
+
+                })
+
+            end
+
+        end)
+
+    end
+
+})
+
+TeleportsTab:Button({
+
+    Title = "Maine Coon",
+
+    Icon = "cat",
+
+    Callback = function()
+
+        pcall(function()
+
+            if HumanoidRootPart then
+
+                HumanoidRootPart.CFrame = workspace.Interiors["MainMap!Christmas"].Event.Winter2025.Winter2025MaineCoonClient.PetModel.MockParts.Head:GetPivot()
+
+                WindUI:Notify({
+
+                    Title = "Teleported",
+
+                    Content = "Teleported to Maine Coon!",
+
+                    Icon = "check",
+
+                    Duration = 2
+
+                })
+
+            end
+
+        end)
+
+    end
+
+})
+
+TeleportsTab:Button({
+
+    Title = "Christmas Train",
+
+    Icon = "train",
+
+    Callback = function()
+
+        pcall(function()
+
+            if HumanoidRootPart then
+
+                HumanoidRootPart.CFrame = workspace["Merry Mistletroll"].PetModel.HumanoidRootPart.CFrame
+
+                game:GetService("ReplicatedStorage").adoptme_new_net:FindFirstChild("adoptme_legacy_shared.ContentPacks.Winter2025.Game.Train.WinterTrainNet:7"):FireServer({
+
+                    carriage = workspace.WinterTrainSeats.Seat
+
+                })
+
+                WindUI:Notify({
+
+                    Title = "Teleported",
+
+                    Content = "Teleported to Christmas Train!",
+
+                    Icon = "check",
+
+                    Duration = 2
+
+                })
+
+            end
+
+        end)
+
+    end
+
+})
+
+TeleportsTab:Button({
+
+    Title = "Sleighball Join Zone",
+
+    Icon = "gamepad",
+
+    Callback = function()
+
+        pcall(function()
+
+            if HumanoidRootPart then
+
+                HumanoidRootPart.CFrame = CFrame.new(-78.3324432, 31.1505432, -1622.28735)
+
+                WindUI:Notify({
+
+                    Title = "Teleported",
+
+                    Content = "Teleported to Sleighball!",
+
+                    Icon = "check",
+
+                    Duration = 2
+
+                })
+
+            end
+
+        end)
+
+    end
+
+})
+
+TeleportsTab:Button({
+
+    Title = "Humbug Join Zone",
+
+    Icon = "gamepad-2",
+
+    Callback = function()
+
+        pcall(function()
+
+            if HumanoidRootPart then
+
+                HumanoidRootPart.CFrame = CFrame.new(-253.122971, 33.4183197, -1464.85608)
+
+                WindUI:Notify({
+
+                    Title = "Teleported",
+
+                    Content = "Teleported to Humbug!",
+
+                    Icon = "check",
+
+                    Duration = 2
+
+                })
+
+            end
+
+        end)
+
+    end
+
+})
+
+TeleportsTab:Paragraph({
+
+    Title = "Main World Teleports",
+
+    Desc = "Teleport to common locations",
+
+    Color = "Green"
+
+})
+
+TeleportsTab:Button({
+
+    Title = "Gift Display",
+
+    Icon = "gift",
+
+    Callback = function()
+
+        pcall(function()
+
+            if HumanoidRootPart then
+
+                HumanoidRootPart.CFrame = CFrame.new(-252.171509, 30.0899029, -1651.99988)
+
+                WindUI:Notify({
+
+                    Title = "Teleported",
+
+                    Content = "Teleported to Gift Display!",
+
+                    Icon = "check",
+
+                    Duration = 2
+
+                })
+
+            end
+
+        end)
+
+    end
+
+})
+
+TeleportsTab:Button({
+
+    Title = "Nursery",
+
+    Icon = "baby-carriage",
+
+    Callback = function()
+
+        pcall(function()
+
+            if HumanoidRootPart then
+
+                HumanoidRootPart.CFrame = CFrame.new(-245.43, 16.13, -1525.58)
+
+                WindUI:Notify({
+
+                    Title = "Teleported",
+
+                    Content = "Teleported to Nursery!",
+
+                    Icon = "check",
+
+                    Duration = 2
+
+                })
+
+            end
+
+        end)
+
+    end
+
+})
+
+TeleportsTab:Button({
+
+    Title = "Cave",
+
+    Icon = "mountain",
+
+    Callback = function()
+
+        pcall(function()
+
+            if HumanoidRootPart then
+
+                HumanoidRootPart.CFrame = CFrame.new(-564.58, 41.28, -364.11)
+
+                WindUI:Notify({
+
+                    Title = "Teleported",
+
+                    Content = "Teleported to Cave!",
+
+                    Icon = "check",
+
+                    Duration = 2
+
+                })
+
+            end
+
+        end)
+
+    end
+
+})
+
+-------------------------------------------------------
+
+--          MINIGAMES TAB
+
+-------------------------------------------------------
+
+getgenv().AutoSleighball = false
+
+getgenv().AutoHumbug = false
+
+getgenv().Teleporting = false
+
+MinigamesTab:Paragraph({
+
+    Title = "Minigame Features",
+
+    Desc = "Auto join and play minigames",
+
+    Image = "gamepad-2",
+
+    Color = "Blue"
+
+})
+
+MinigamesTab:Toggle({
+
+    Title = "Auto Join Sleighball (10s)",
+
+    Default = false,
+
+    Callback = function(value)
+
+        getgenv().AutoSleigh = value
+
+        if value then
+
+            task.spawn(function()
+
+                while getgenv().AutoSleigh do
+
+                    task.wait(0.5)
+
+                    pcall(function()
+
+                        if not getgenv().Teleporting and HumanoidRootPart then
+
+                            for _, label in pairs(localPlayer.PlayerGui:GetDescendants()) do
+
+                                if label:IsA("TextLabel") and label.Visible then
+
+                                    local text = label.Text:lower()
+
+                                    if text:find("sleigh") and text:match("%d+:%d+") then
+
+                                        local min, sec = text:match("(%d+):(%d+)")
+
+                                        min = tonumber(min)
+
+                                        sec = tonumber(sec)
+
+                                        if min == 0 and sec and sec <= 10 and sec >= 1 then
+
+                                            getgenv().Teleporting = true
+
+                                            HumanoidRootPart.CFrame = CFrame.new(-78.3324432, 31.1505432, -1622.28735)
+
+                                            task.wait(8)
+
+                                            getgenv().Teleporting = false
+
+                                        end
+
+                                    end
+
+                                end
+
+                            end
+
+                        end
+
+                    end)
+
+                end
+
+            end)
+
+        end
+
+    end
+
+})
+
+MinigamesTab:Toggle({
+
+    Title = "Auto Join Humbug (10s)",
+
+    Default = false,
+
+    Callback = function(value)
+
+        getgenv().AutoHumbug = value
+
+        if value then
+
+            task.spawn(function()
+
+                while getgenv().AutoHumbug do
+
+                    task.wait(0.5)
+
+                    pcall(function()
+
+                        if not getgenv().Teleporting and HumanoidRootPart then
+
+                            for _, label in pairs(localPlayer.PlayerGui:GetDescendants()) do
+
+                                if label:IsA("TextLabel") and label.Visible then
+
+                                    local text = label.Text:lower()
+
+                                    if text:find("humbug") and text:match("%d+:%d+") then
+
+                                        local min, sec = text:match("(%d+):(%d+)")
+
+                                        min = tonumber(min)
+
+                                        sec = tonumber(sec)
+
+                                        if min == 0 and sec and sec <= 10 and sec >= 1 then
+
+                                            getgenv().Teleporting = true
+
+                                            HumanoidRootPart.CFrame = CFrame.new(-253.122971, 33.4183197, -1464.85608)
+
+                                            task.wait(8)
+
+                                            getgenv().Teleporting = false
+
+                                        end
+
+                                    end
+
+                                end
+
+                            end
+
+                        end
+
+                    end)
+
+                end
+
+            end)
+
+        end
+
+    end
+
+})
+
+MinigamesTab:Toggle({
+
+    Title = "Auto Play Sleighball",
+
+    Default = false,
+
+    Callback = function(value)
+
+        getgenv().AutoSleighball = value
+
+        if value then
+
+            task.spawn(function()
+
+                local TweenService = game:GetService("TweenService")
+
+                while getgenv().AutoSleighball do
+
+                    task.wait(0.25)
+
+                    pcall(function()
+
+                        if HumanoidRootPart then
+
+                            local interior = nil
+
+                            for _, child in ipairs(workspace.Interiors:GetChildren()) do
+
+                                if child.Name:find("SleighballInterior") then
+
+                                    interior = child
+
+                                    break
+
+                                end
+
+                            end
+
+                            
+
+                            if interior and interior:FindFirstChild("Game") then
+
+                                local game = interior.Game
+
+                                if game:FindFirstChild("Bin") and game:FindFirstChild("Goals") then
+
+                                    local ball = nil
+
+                                    for _, item in ipairs(game.Bin:GetDescendants()) do
+
+                                        if item:IsA("BasePart") then
+
+                                            ball = item
+
+                                            break
+
+                                        end
+
+                                    end
+
+                                    
+
+                                    if ball then
+
+                                        local tween = TweenService:Create(HumanoidRootPart, TweenInfo.new(0.45, Enum.EasingStyle.Linear), {
+
+                                            CFrame = ball.CFrame * CFrame.new(0, 3, 0)
+
+                                        })
+
+                                        tween:Play()
+
+                                        tween.Completed:Wait()
+
+                                        task.wait(0.15)
+
+                                        
+
+                                        local goals = {}
+
+                                        if game.Goals:FindFirstChild("GreenGoal") then
+
+                                            table.insert(goals, game.Goals.GreenGoal)
+
+                                        end
+
+                                        if game.Goals:FindFirstChild("RedGoal") then
+
+                                            table.insert(goals, game.Goals.RedGoal)
+
+                                        end
+
+                                        
+
+                                        for _, goal in ipairs(goals) do
+
+                                            if not getgenv().AutoSleighball then break end
+
+                                            tween = TweenService:Create(HumanoidRootPart, TweenInfo.new(0.4, Enum.EasingStyle.Linear), {
+
+                                                CFrame = goal.CFrame * CFrame.new(0, 3, 0)
+
+                                            })
+
+                                            tween:Play()
+
+                                            tween.Completed:Wait()
+
+                                            firetouchinterest(HumanoidRootPart, goal, 0)
+
+                                            task.wait(0.1)
+
+                                            firetouchinterest(HumanoidRootPart, goal, 1)
+
+                                            task.wait(0.2)
+
+                                        end
+
+                                    end
+
+                                end
+
+                            end
+
+                        end
+
+                    end)
+
+                end
+
+            end)
+
+        end
+
+    end
+
+})
+
+MinigamesTab:Button({
+
+    Title = "Finish Race (Penguin)",
+
+    Icon = "flag",
+
+    Callback = function()
+
+        pcall(function()
+
+            local TweenService = game:GetService("TweenService")
+
+            local christmas = workspace.Interiors["MainMap!Christmas"]
+
+            local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear)
+
+            
+
+            local gates = {}
+
+            for _, child in ipairs(christmas:GetChildren()) do
+
+                if child.Name == "GateTemplate" then
+
+                    local ring = child:FindFirstChild("Ring")
+
+                    if ring and ring:IsA("BasePart") then
+
+                        table.insert(gates, ring)
+
+                    end
+
+                end
+
+            end
+
+            
+
+            if #gates == 0 then
+
+                WindUI:Notify({
+
+                    Title = "Error",
+
+                    Content = "Race not started! Talk to Penguin first.",
+
+                    Icon = "alert-circle",
+
+                    Duration = 3
+
+                })
+
+                return
+
+            end
+
+            
+
+            for _, gate in ipairs(gates) do
+
+                if gate and HumanoidRootPart then
+
+                    local tween = TweenService:Create(HumanoidRootPart, tweenInfo, {
+
+                        CFrame = CFrame.new(gate.Position.X, gate.Position.Y + 2, gate.Position.Z)
+
+                    })
+
+                    tween:Play()
+
+                    tween.Completed:Wait()
+
+                end
+
+            end
+
+            
+
+            WindUI:Notify({
+
+                Title = "Success",
+
+                Content = "Race completed!",
+
+                Icon = "check",
+
+                Duration = 3
+
+            })
+
+        end)
+
+    end
+
+})
+
+MinigamesTab:Toggle({
+
+    Title = "Show Minigame Countdowns",
+
+    Default = false,
+
+    Callback = function(value)
+
+        getgenv().DualCountdownRunning = value
+
+        
+
+        if value then
+
+            local guiName = "DualCountdownGUI"
+
+            if localPlayer.PlayerGui:FindFirstChild(guiName) then
+
+                localPlayer.PlayerGui[guiName]:Destroy()
+
+            end
+
+            
+
+            local screenGui = Instance.new("ScreenGui")
+
+            screenGui.Name = guiName
+
+            screenGui.ResetOnSpawn = false
+
+            screenGui.Parent = localPlayer.PlayerGui
+
+            
+
+            local frame = Instance.new("Frame")
+
+            frame.Size = UDim2.new(0, 250, 0, 80)
+
+            frame.Position = UDim2.new(0.5, -125, 0.1, 0)
+
+            frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+            frame.BackgroundTransparency = 0.3
+
+            frame.BorderSizePixel = 0
+
+            frame.Parent = screenGui
+
+            
+
+            Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+            
+
+            local sleighLabel = Instance.new("TextLabel")
+
+            sleighLabel.Size = UDim2.new(1, 0, 0, 35)
+
+            sleighLabel.Position = UDim2.new(0, 0, 0, 5)
+
+            sleighLabel.BackgroundTransparency = 1
+
+            sleighLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+
+            sleighLabel.Font = Enum.Font.GothamBold
+
+            sleighLabel.TextSize = 18
+
+            sleighLabel.Text = "Sleighball: Waiting..."
+
+            sleighLabel.Parent = frame
+
+            
+
+            local humbugLabel = Instance.new("TextLabel")
+
+            humbugLabel.Size = UDim2.new(1, 0, 0, 35)
+
+            humbugLabel.Position = UDim2.new(0, 0, 0, 40)
+
+            humbugLabel.BackgroundTransparency = 1
+
+            humbugLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+
+            humbugLabel.Font = Enum.Font.GothamBold
+
+            humbugLabel.TextSize = 18
+
+            humbugLabel.Text = "Humbug: Waiting..."
+
+            humbugLabel.Parent = frame
+
+            
+
+            local function getTimer(zoneName)
+
+                local interiors = workspace:FindFirstChild("Interiors")
+
+                local christmas = interiors and interiors:FindFirstChild("MainMap!Christmas")
+
+                local zone = christmas and christmas:FindFirstChild(zoneName)
+
+                local billboard = zone and zone:FindFirstChild("Billboard")
+
+                local gui = billboard and billboard:FindFirstChild("BillboardGui")
+
+                local timer = gui and gui:FindFirstChild("TimerLabel")
+
+                return timer and timer.Text or "N/A"
+
+            end
+
+            
+
+            task.spawn(function()
+
+                while getgenv().DualCountdownRunning do
+
+                    task.wait(0.2)
+
+                    if not screenGui.Parent then break end
+
+                    sleighLabel.Text = "Sleighball: " .. getTimer("SleighballMinigameJoinZone")
+
+                    humbugLabel.Text = "Humbug: " .. getTimer("HumbugMinigameJoinZone")
+
+                end
+
+            end)
+
+        else
+
+            if localPlayer.PlayerGui:FindFirstChild("DualCountdownGUI") then
+
+                localPlayer.PlayerGui.DualCountdownGUI:Destroy()
+
+            end
+
+        end
+
+    end
+
+})
+
+-------------------------------------------------------
+
+--          MISC TAB
+
+-------------------------------------------------------
+
+MiscTab:Paragraph({
+
+    Title = "Miscellaneous Features",
+
+    Desc = "Various helpful utilities",
+
+    Image = "settings",
+
+    Color = "Blue"
+
+})
+
+MiscTab:Button({
+
+    Title = "Anti AFK",
+
+    Icon = "clock",
+
+    Callback = function()
+
+        local VirtualUser = game:GetService("VirtualUser")
+
+        localPlayer.Idled:Connect(function()
+
+            VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+
+            task.wait(1)
+
+            VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+
+        end)
+
+        WindUI:Notify({
+
+            Title = "Activated",
+
+            Content = "Anti-AFK is now active!",
+
+            Icon = "check",
+
+            Duration = 3
+
+        })
+
+    end
+
+})
+
+MiscTab:Toggle({
+
+    Title = "Auto Snowball Pug",
+
+    Default = false,
+
+    Callback = function(value)
+
+        getgenv().AutoSnowballPug = value
+
+        if value then
+
+            task.spawn(function()
+
+                while getgenv().AutoSnowballPug do
+
+                    task.wait(0.15)
+
+                    pcall(function()
+
+                        local api = game:GetService("ReplicatedStorage"):FindFirstChild("API")
+
+                        if api then
+
+                            for _, child in pairs(api:GetChildren()) do
+
+                                if child:IsA("RemoteFunction") then
+
+                                    child:InvokeServer(true)
+
+                                elseif child:IsA("RemoteEvent") then
+
+                                    child:FireServer()
+
+                                end
+
+                            end
+
+                        end
+
+                    end)
+
+                end
+
+            end)
+
+        end
+
+    end
+
+})
+
+MiscTab:Button({
+
+    Title = "Make All Pets Mega Neon",
+
+    Icon = "sparkles",
+
+    Callback = function()
+
+        pcall(function()
+
+            local ClientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
+
+            for _, pet in pairs(ClientData.get_data()[tostring(localPlayer)].inventory.pets) do
+
+                pet.properties.rideable = true
+
+                pet.properties.flyable = true
+
+                pet.properties.mega_neon = true
+
+            end
+
+            WindUI:Notify({
+
+                Title = "Success",
+
+                Content = "All pets set to Mega Neon!",
+
+                Icon = "check",
+
+                Duration = 3
+
+            })
+
+        end)
+
+    end
+
+})
+
+MiscTab:Button({
+
+    Title = "Rejoin Server",
+
+    Icon = "refresh-cw",
+
+    Callback = function()
+
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, localPlayer)
+
+    end
+
+})
+
+MiscTab:Button({
+
+    Title = "Server Hop",
+
+    Icon = "shuffle",
+
+    Callback = function()
+
+        local TeleportService = game:GetService("TeleportService")
+
+        local HttpService = game:GetService("HttpService")
+
+        
+
+        local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+
+        
+
+        for _, server in pairs(servers.data) do
+
+            if server.playing < server.maxPlayers and server.id ~= game.JobId then
+
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, localPlayer)
+
+                break
+
+            end
+
+        end
+
+    end
+
+})
+
+MiscTab:Paragraph({
+
+    Title = "Player Info",
+
+    Desc = "Display Name: " .. localPlayer.DisplayName .. "\nUsername: @" .. localPlayer.Name .. "\nUser ID: " .. localPlayer.UserId,
+
+    Color = "Green"
+
+})
+
+-------------------------------------------------------
+
+--          HOUSE CLONER TAB UI
+
+-------------------------------------------------------
+
+local houseType = "micro_2023"
+
+local selectedHouse = nil
+
+local pasteTextures = false
+
+HouseClonerTab:Paragraph({
+
+    Title = "House Cloner",
+
+    Desc = "Clone, save, load and scan houses",
+
+    Image = "home",
+
+    Color = "Blue"
+
+})
+
+HouseClonerTab:Dropdown({
+
+    Title = "Select House Type",
+
+    Values = {"micro_2023", "small_2023", "villa_2023"},
+
+    Multi = false,
+
+    Default = houseType,
+
+    Callback = function(option)
+
+        houseType = option
+
+        print("Selected house type:", option)
+
+    end
+
+})
+
+HouseClonerTab:Dropdown({
+
+    Title = "Select House File",
+
+    Values = {"House1", "House2", "House3"},
+
+    Multi = false,
+
+    Default = "House1",
+
+    Callback = function(option)
+
+        selectedHouse = option
+
+        print("Selected file:", option)
+
+    end
+
+})
+
+HouseClonerTab:Button({
+
+    Title = "Refresh Files",
+
+    Icon = "refresh-ccw",
+
+    Callback = function()
+
+        print("Refreshing files...")
+
+        WindUI:Notify({
+
+            Title = "Refreshing",
+
+            Content = "Reloading house files...",
+
+            Icon = "loader",
+
+            Duration = 2
+
+        })
+
+    end
+
+})
+
+HouseClonerTab:Button({
+
+    Title = "Save House to File",
+
+    Icon = "save",
+
+    Callback = function()
+
+        print("Save house clicked.")
+
+        WindUI:Notify({
+
+            Title = "Saving",
+
+            Content = "Saving house to file...",
+
+            Icon = "save",
+
+            Duration = 2
+
+        })
+
+    end
+
+})
+
+HouseClonerTab:Button({
+
+    Title = "Load House from File",
+
+    Icon = "folder-open",
+
+    Callback = function()
+
+        print("Load house clicked.")
+
+        WindUI:Notify({
+
+            Title = "Loading",
+
+            Content = "Loading house from file...",
+
+            Icon = "folder-open",
+
+            Duration = 2
+
+        })
+
+    end
+
+})
+
+HouseClonerTab:Button({
+
+    Title = "Scan House",
+
+    Icon = "search",
+
+    Callback = function()
+
+        print("Scanning house...")
+
+        WindUI:Notify({
+
+            Title = "Scanning",
+
+            Content = "Scanning current house...",
+
+            Icon = "search",
+
+            Duration = 2
+
+        })
+
+    end
+
+})
+
+HouseClonerTab:Toggle({
+
+    Title = "Paste Textures",
+
+    Default = false,
+
+    Callback = function(val)
+
+        pasteTextures = val
+
+        print("Paste textures:", val)
+
+    end
+
+})
+
+HouseClonerTab:Paragraph({
+
+    Title = "⚠️ Warning",
+
+    Desc = "Do not touch unless you know what you're doing.",
+
+    Color = "Red"
+
+})
+
+-------------------------------------------------------
+
+--          DISCORD TAB UI
+
+-------------------------------------------------------
+
+DiscordTab:Paragraph({
+
+    Title = "Join Our Discord!",
+
+    Desc = "Click the button below to copy the invite link",
+
+    Image = "users",
+
+    Color = "Blue"
+
+})
+
+DiscordTab:Button({
+
+    Title = "Copy Discord Invite",
+
+    Icon = "users",
+
+    Callback = function()
+
+        task.spawn(function()
+
+            setclipboard("https://discord.gg/2vxSdFF375")
+
+            WindUI:Notify({
+
+                Title = "Copied",
+
+                Content = "Discord invite copied to clipboard!",
+
+                Icon = "check",
+
+                Duration = 3
+
+            })
+
+        end)
+
+    end
+
+})
+
+DiscordTab:Paragraph({
+
+    Title = "Support",
+
+    Desc = "Join our Discord for:\n• Updates & announcements\n• Bug reports\n• Feature requests\n• Community support",
+
+    Color = "Green"
+
+})
+
+-------------------------------------------------------
+
+--          FINAL NOTIFICATION
+
+-------------------------------------------------------
+
+WindUI:Notify({
+
+    Title = "Benjo Hub Loaded",
+
+    Content = "All features ready to use!",
+
+    Icon = "check",
+
+    Duration = 5
+
+})
+
+print("[Benjo Hub] Successfully loaded!")
+
+print("Benjo Hub] Press B to toggle UI")
