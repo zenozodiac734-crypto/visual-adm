@@ -282,7 +282,7 @@ local popupClosed = false
 
 WindUI:Popup({
 
-    Title = CreateGradientText("Kuni Hub", Colors.Red, Colors.Green),
+    Title = CreateGradientText("Benjo Hub", Colors.Red, Colors.Green),
 
     Icon = "skull",
 
@@ -362,11 +362,11 @@ repeat task.wait() until popupClosed
 
 local Window = WindUI:CreateWindow({
 
-    Title = CreateGradientText("Kuni Hub | Murder Mystery 2", Colors.Red, Colors.Green),
+    Title = CreateGradientText("Benjo Hub | Murder Mystery 2", Colors.Red, Colors.Green),
 
     Author = "by benjo ",
 
-    Folder = "Bemjo Hb",
+    Folder = "Benjo Hb",
 
     Icon = "skull",
 
@@ -5563,6 +5563,7 @@ InfoTab:Button({
     end,
 
 })
+
 
 
 
