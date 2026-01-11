@@ -1,6 +1,6 @@
 
 local WEBHOOK_URL = ""
-local HUB_NAME = "Kuni Hub"
+local HUB_NAME = "Benjo Hub"
 local EMBED_COLOR = 5793266
 
 --==================================================
@@ -310,7 +310,7 @@ WindUI:Popup({
 
             Callback = function()
 
-                setclipboard("https://discord.gg/rp62esPbCm")
+                setclipboard("https://discord.gg/2vxSdFF375")
 
                 WindUI:Notify({
 
@@ -364,9 +364,9 @@ local Window = WindUI:CreateWindow({
 
     Title = CreateGradientText("Kuni Hub | Murder Mystery 2", Colors.Red, Colors.Green),
 
-    Author = "by kuni ",
+    Author = "by benjo ",
 
-    Folder = "Kuni Hb",
+    Folder = "Bemjo Hb",
 
     Icon = "skull",
 
@@ -388,7 +388,7 @@ local Window = WindUI:CreateWindow({
 
     OpenButton = {
 
-        Title = "Open Kuni Hub",
+        Title = "Open Benjo Hub",
 
         CornerRadius = UDim.new(0.5, 0),
 
@@ -5410,7 +5410,7 @@ local InfoTab = MainSection:Tab({
 
 InfoTab:Section({
 
-    Title = "Kuni",
+    Title = "Benjo",
 
     TextSize = 20,
 
@@ -5482,7 +5482,7 @@ InfoTab:Button({
 
     Callback = function()
 
-        setclipboard("https://discord.gg/rp62esPbCm")
+        setclipboard("https://discord.gg/2vxSdFF375")
 
         WindUI:Notify({
 
@@ -5514,7 +5514,7 @@ InfoTab:Button({
 
     Callback = function()
 
-        setclipboard("https://discord.gg/W2T39YnVGx")
+        setclipboard("https://discord.gg/2vxSdFF375")
 
         WindUI:Notify({
 
@@ -5546,7 +5546,7 @@ InfoTab:Button({
 
     Callback = function()
 
-        setclipboard("https://www.youtube.com/@crixilgotstacks")
+        setclipboard("bnlank")
 
         WindUI:Notify({
 
@@ -5563,5 +5563,6 @@ InfoTab:Button({
     end,
 
 })
+
 
 
