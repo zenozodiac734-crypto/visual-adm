@@ -5514,7 +5514,7 @@ InfoTab:Button({
 
     Callback = function()
 
-        setclipboard("https://discord.gg/2vxSdFF375")
+        setclipboard("https://discord.gg/nd64GVVnvp")
 
         WindUI:Notify({
 
