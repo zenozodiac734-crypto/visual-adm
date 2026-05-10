@@ -1,6 +1,6 @@
 
 local WEBHOOK_URL = ""
-local HUB_NAME = "Benjo Hub"
+local HUB_NAME = "Syntax Hub"
 local EMBED_COLOR = 5793266
 
 --==================================================
