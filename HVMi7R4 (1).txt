@@ -12,7 +12,7 @@ local Confirmed = false
 
 WindUI:Popup({
 
-    Title = "Benjo Hub",
+    Title = "Syntax Hub",
 
     Icon = "cuboid",
 
@@ -3072,7 +3072,7 @@ DiscordTab:Paragraph({
 
 WindUI:Notify({
 
-    Title = "Benjo Hub Loaded",
+    Title = "Syntax Hub Loaded",
 
     Content = "All features ready to use!",
 
@@ -3082,6 +3082,6 @@ WindUI:Notify({
 
 })
 
-print("[Benjo Hub] Successfully loaded!")
+print("[Syntax Hub] Successfully loaded!")
 
-print("Benjo Hub] Press B to toggle UI")
+print("Syntax Hub] Press B to toggle UI")
