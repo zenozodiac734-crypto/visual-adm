@@ -282,7 +282,7 @@ local popupClosed = false
 
 WindUI:Popup({
 
-    Title = CreateGradientText("Benjo Hub", Colors.Red, Colors.Green),
+    Title = CreateGradientText("Syntax Hub", Colors.Red, Colors.Green),
 
     Icon = "skull",
 
