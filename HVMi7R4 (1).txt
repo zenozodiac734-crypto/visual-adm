@@ -58,13 +58,13 @@ repeat wait() until Confirmed
 
 local Window = WindUI:CreateWindow({
 
-    Title = "Adopt Me | Benjo Hub",
+    Title = "Adopt Me | Syntax Hub",
 
     Icon = "laptop",
 
-    Author = "made by benjo",
+    Author = "made by Syntax",
 
-    Folder = "BenjoHubAdoptMe",
+    Folder = "SyntaxHubAdoptMe",
 
     Size = UDim2.fromOffset(520, 420),
 
@@ -90,7 +90,7 @@ local Window = WindUI:CreateWindow({
 
 Window:EditOpenButton({
 
-    Title = "Open Benjo Hub",
+    Title = "Open Syntax Hub",
 
     Icon = "rbxassetid://4483345998",
 
@@ -118,11 +118,11 @@ Window:SetToggleKey(Enum.KeyCode.K)
 
 local GingerbreadTab = Window:Tab({
 
-    Title = "Gingerbread Farm",
+    Title = "auto Farm",
 
     Icon = "cookie",
 
-    Desc = "Auto farm gingerbread"
+    Desc = "Auto farm event"
 
 })
 
