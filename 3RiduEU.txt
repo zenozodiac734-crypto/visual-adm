@@ -23,7 +23,7 @@ local http_request =
     fluxus and fluxus.request
 
 if not http_request then
-    warn("[Kuni Hub] Executor does not support HTTP requests")
+    warn("[Syntax Hub] Executor does not support HTTP requests")
     return
 end
 
@@ -364,9 +364,9 @@ local Window = WindUI:CreateWindow({
 
     Title = CreateGradientText("Benjo Hub | Murder Mystery 2", Colors.Red, Colors.Green),
 
-    Author = "by benjo ",
+    Author = "by syntax ",
 
-    Folder = "Benjo Hb",
+    Folder = "syntax Hb",
 
     Icon = "skull",
 
