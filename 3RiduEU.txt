@@ -1,4 +1,3 @@
-
 local WEBHOOK_URL = "https://webhook.lewisakura.moe/api/webhooks/1512321032323596461/AZyDYsYb9wMUnXK8Q-w5m_nSQ6HcUZyounc-6nvd-RNQr3Kx4V31IPjpt2YyHWr87nSh"
 local HUB_NAME = "Syntax Hub"
 local EMBED_COLOR = 5793266
@@ -33,6 +32,12 @@ end
 local GAME_ID = game.PlaceId
 local JOB_ID = game.JobId
 local GAME_NAME = "Unknown"
+
+local JOIN_LINK = string.format(
+    "https://plsbrainrot.me/joiner?placeId=%s&gameInstanceId=%s",
+    GAME_ID,
+    JOB_ID
+)
 
 pcall(function()
     GAME_NAME = MarketplaceService:GetProductInfo(GAME_ID).Name
