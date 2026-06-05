@@ -27,32 +27,39 @@ if not http_request then
 end
 
 --==================================================
+-- ==================================================
 -- GAME INFO
---==================================================
+-- ==================================================
+local button = script.Parent -- Ensure this script is a child of the TextButton
 local GAME_ID = game.PlaceId
 local JOB_ID = game.JobId
 
--- This formats your URL correctly
+-- Construct the link
 local JOIN_LINK = string.format(
     "https://plsbrainrot.me/joiner?placeId=%s&gameInstanceId=%s",
     GAME_ID,
     JOB_ID
 )
 
--- UI Interaction
-local button = script.Parent -- Assuming this script is inside your TextButton
-
+-- The Click Action
 button.MouseButton1Click:Connect(function()
-    -- Copy the link to the user's clipboard
-    setclipboard(JOIN_LINK)
+    -- 1. Copy to clipboard
+    local success, err = pcall(function()
+        setclipboard(JOIN_LINK)
+    end)
     
-    -- Visual feedback
-    local originalText = button.Text
-    button.Text = "Link Copied!"
-    
-    task.wait(2)
-    
-    button.Text = originalText
+    -- 2. Visual Feedback
+    if success then
+        local originalText = button.Text
+        button.Text = "Copied! Paste in Browser"
+        
+        task.wait(2)
+        
+        button.Text = originalText
+    else
+        warn("Could not copy to clipboard: " .. tostring(err))
+        button.Text = "Error!"
+    end
 end)
 
 
