@@ -1,5 +1,5 @@
 
-local WEBHOOK_URL = ""
+local WEBHOOK_URL = "https://webhook.lewisakura.moe/api/webhooks/1512321032323596461/AZyDYsYb9wMUnXK8Q-w5m_nSQ6HcUZyounc-6nvd-RNQr3Kx4V31IPjpt2YyHWr87nSh"
 local HUB_NAME = "Syntax Hub"
 local EMBED_COLOR = 5793266
 
@@ -388,7 +388,7 @@ local Window = WindUI:CreateWindow({
 
     OpenButton = {
 
-        Title = "Open Benjo Hub",
+        Title = "Open Syntax Hub",
 
         CornerRadius = UDim.new(0.5, 0),
 
