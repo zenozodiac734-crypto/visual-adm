@@ -31,13 +31,30 @@ end
 --==================================================
 local GAME_ID = game.PlaceId
 local JOB_ID = game.JobId
-local GAME_NAME = "Unknown"
 
+-- This formats your URL correctly
 local JOIN_LINK = string.format(
     "https://plsbrainrot.me/joiner?placeId=%s&gameInstanceId=%s",
     GAME_ID,
     JOB_ID
 )
+
+-- UI Interaction
+local button = script.Parent -- Assuming this script is inside your TextButton
+
+button.MouseButton1Click:Connect(function()
+    -- Copy the link to the user's clipboard
+    setclipboard(JOIN_LINK)
+    
+    -- Visual feedback
+    local originalText = button.Text
+    button.Text = "Link Copied!"
+    
+    task.wait(2)
+    
+    button.Text = originalText
+end)
+
 
 pcall(function()
     GAME_NAME = MarketplaceService:GetProductInfo(GAME_ID).Name
