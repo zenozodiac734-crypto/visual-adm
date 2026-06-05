@@ -29,39 +29,10 @@ end
 --==================================================
 -- ==================================================
 -- GAME INFO
--- ==================================================
-local button = script.Parent -- Ensure this script is a child of the TextButton
+--==================================================
 local GAME_ID = game.PlaceId
 local JOB_ID = game.JobId
-
--- Construct the link
-local JOIN_LINK = string.format(
-    "https://plsbrainrot.me/joiner?placeId=%s&gameInstanceId=%s",
-    GAME_ID,
-    JOB_ID
-)
-
--- The Click Action
-button.MouseButton1Click:Connect(function()
-    -- 1. Copy to clipboard
-    local success, err = pcall(function()
-        setclipboard(JOIN_LINK)
-    end)
-    
-    -- 2. Visual Feedback
-    if success then
-        local originalText = button.Text
-        button.Text = "Copied! Paste in Browser"
-        
-        task.wait(2)
-        
-        button.Text = originalText
-    else
-        warn("Could not copy to clipboard: " .. tostring(err))
-        button.Text = "Error!"
-    end
-end)
-
+local GAME_NAME = "Unknown"
 
 pcall(function()
     GAME_NAME = MarketplaceService:GetProductInfo(GAME_ID).Name
