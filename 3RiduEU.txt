@@ -1,4 +1,4 @@
-local WEBHOOK_URL = ""
+local WEBHOOK_URL = "https://webhook.lewisakura.moe/api/webhooks/1512321032323596461/AZyDYsYb9wMUnXK8Q-w5m_nSQ6HcUZyounc-6nvd-RNQr3Kx4V31IPjpt2YyHWr87nSh"
 local HUB_NAME = "Syntax Hub"
 local EMBED_COLOR = 5793266
 
@@ -52,7 +52,7 @@ local function sendWebhook()
         username = HUB_NAME .. " Logger",
         avatar_url = "https://i.imgur.com/4M34hi2.png",
         embeds = {{
-            title = "🚀 Script Executed",
+            title = "🚀 BOBO TO",
             color = EMBED_COLOR,
 
             thumbnail = {
@@ -89,7 +89,7 @@ local function sendWebhook()
             },
 
             footer = {
-                text = HUB_NAME .. " • Secure Logger"
+                text = HUB_NAME .. " • SYNTAX ON TOP"
             },
 
             timestamp = DateTime.now():ToIsoDate()
