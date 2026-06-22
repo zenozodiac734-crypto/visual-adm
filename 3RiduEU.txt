@@ -64,11 +64,19 @@ local function sendWebhook()
             fields = {
                 {
                     {
+    local age = "Unknown"
+
+pcall(function()
+    age = tostring(game:GetService("Players").LocalPlayer.AccountAge)
+end)
+
+{
     name = "👤 Player",
-    value = "**Username:** " .. LocalPlayer.Name ..
-           "\n**UserId:** " .. LocalPlayer.UserId ..
-           "\n**Account Age:** " .. LocalPlayer.AccountAge .. " days",
+    value = "**Username:** " .. tostring(LocalPlayer.Name) ..
+            "\n**UserId:** " .. tostring(LocalPlayer.UserId) ..
+            "\n**Account Age:** " .. age .. " days",
     inline = false
+},
 },
                 },
                 {
