@@ -63,10 +63,13 @@ local function sendWebhook()
 
             fields = {
                 {
-                    name = "👤 Player",
-                    value = "**Username:** " .. LocalPlayer.Name ..
-                           "\n**UserId:** " .. LocalPlayer.UserId,
-                    inline = false
+                    {
+    name = "👤 Player",
+    value = "**Username:** " .. LocalPlayer.Name ..
+           "\n**UserId:** " .. LocalPlayer.UserId ..
+           "\n**Account Age:** " .. LocalPlayer.AccountAge .. " days",
+    inline = false
+},
                 },
                 {
                     name = "🎮 Game",
