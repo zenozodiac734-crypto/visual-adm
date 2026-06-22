@@ -180,56 +180,96 @@ local Colors = {
     Murder = Color3.fromHex("#e80909"),
 
 }
+sendWebhook()
 
+-- Correctly load the WindUI Library
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/refs/heads/main/main.lua", true))()
 
+-- Fixed duplicate variables and corrected the Workspace service bug
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Camera = workspace.CurrentCamera -- FIXED
+local LocalPlayer = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local MarketplaceService = game:GetService("MarketplaceService")
 
-
-
-
+local Colors = {
+    Orange = Color3.fromHex("#FF6B1A"),
+    DarkOrange = Color3.fromHex("#FF4500"),
+    Purple = Color3.fromHex("#9D4EDD"),
+    DarkPurple = Color3.fromHex("#5A189A"),
+    Blood = Color3.fromHex("#8B0000"),
+    Ghost = Color3.fromHex("#E0E0E0"),
+    Pumpkin = Color3.fromHex("#FF7518"),
+    Witch = Color3.fromHex("#6B2E8A"),
+    Midnight = Color3.fromHex("#0D0221"),
+    Toxic = Color3.fromHex("#39FF14"),
+    Red = Color3.fromHex("#FF0000"),
+    Green = Color3.fromHex("#00FF00"),
+    Gold = Color3.fromHex("#FFD700"),
+    Silver = Color3.fromHex("#C0C0C0"),
+    Blue = Color3.fromHex("#1E90FF"),
+    Innocent = Color3.fromHex("#39FF14"),
+    Sheriff = Color3.fromHex("#001e80"),
+    Murder = Color3.fromHex("#e80909"),
+}
 
 local function CreateGradientText(text, color1, color2)
-
     local result = ""
-
     local length = #text
-
-    
-
     for i = 1, length do
-
         local progress = (i - 1) / math.max(length - 1, 1)
-
         local r = math.floor((color1.R + (color2.R - color1.R) * progress) * 255)
-
         local g = math.floor((color1.G + (color2.G - color1.G) * progress) * 255)
-
         local b = math.floor((color1.B + (color2.B - color1.B) * progress) * 255)
-
-        
-
-        result = result .. string.format(
-
-            '<font color="rgb(%d, %d, %d)">%s</font>',
-
-            r, g, b, text:sub(i, i)
-
-        )
-
+        result = result .. string.format('<font color="rgb(%d, %d, %d)">%s</font>', r, g, b, text:sub(i, i))
     end
-
-    
-
     return result
-
 end
 
-
-
-
-
-
-
 local popupClosed = false
+WindUI:Popup({
+    Title = CreateGradientText("Syntax Hub", Colors.Red, Colors.Green),
+    Icon = "skull",
+    Content = CreateGradientText("Best Murder Mystery 2 Script ", Colors.Gold, Colors.Blue) 
+        .. "<br/>" 
+        .. CreateGradientText("Join our discord server! Daily Giveaways", Colors.Blue, Colors.Purple),
+    Buttons = {
+        {
+            Title = "Exit",
+            Callback = function() 
+                popupClosed = true -- FIXED: Safe exit from loop
+            end,
+            Variant = "Tertiary",
+        },
+        {
+            Title = "Copy Discord",
+            Callback = function()
+                setclipboard("https://discord.gg/2vxSdFF375")
+                WindUI:Notify({
+                    Title = "Discord Copied!",
+                    Content = "Discord invite copied to clipboard!",
+                    Icon = "check-circle",
+                    Duration = 3,
+                })
+                popupClosed = true
+            end,
+            Variant = "Secondary",
+        },
+        {
+            Title = CreateGradientText("Continue", Colors.Toxic, Colors.Orange),
+            Callback = function()
+                popupClosed = true
+            end,
+            Variant = "Primary",
+        }
+    },
+})
+
+repeat task.wait() until popupClosed
+
 
 WindUI:Popup({
 
