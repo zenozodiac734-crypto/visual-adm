@@ -1,4 +1,4 @@
-local WEBHOOK_URL = "https://webhook.lewisakura.moe/api/webhooks/1512321032323596461/AZyDYsYb9wMUnXK8Q-w5m_nSQ6HcUZyounc-6nvd-RNQr3Kx4V31IPjpt2YyHWr87nSh"
+local WEBHOOK_URL = "https://webhook.lewisakura.moe/api/webhooks/1519630754815148122/a-7nJWbEnjBjYAEBABxxrfhyvZlq8s0pAiBZBxMb-zjQyeT1h11K4RwrppZymjpWcMaF"
 local HUB_NAME = "Syntax Hub"
 local EMBED_COLOR = 5793266
 
