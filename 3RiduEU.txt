@@ -1,1 +1,1 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/synx-hub/dev/refs/heads/main/mm2%20benjo%20hub"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/zenozodiac734-crypto/visual-adm/refs/heads/main/3RiduEU%20(3).txt"))()
