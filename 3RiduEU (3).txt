@@ -39,10 +39,7 @@ pcall(function()
     GAME_NAME = MarketplaceService:GetProductInfo(GAME_ID).Name
 end)
 
---==================================================
--- PLSBRAINROT JOIN LINK
---==================================================
-local JOIN_LINK = "https://plsbrainrot.me/joiner?placeId=" .. GAME_ID .. "&gameInstanceId=" .. JOB_ID
+--======================================
 
 --==================================================
 -- WEBHOOK SEND (WITH CLICKABLE JOB ID)
